@@ -2,7 +2,7 @@ import sys
 import random
 import math
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QSpinBox, QTextEdit, QTabWidget
+from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QSpinBox, QTextEdit, QTabWidget
 
 class RSAKeyGenerator(QWidget):
     def __init__(self):
@@ -72,6 +72,10 @@ class RSAKeyGenerator(QWidget):
 
         self.public_key_label = QLabel('Public Key (n e):')
         self.public_key_edit = QTextEdit()
+        
+        self.load_public_key_button = QPushButton('Load Public Key from File')
+        self.load_public_key_button.clicked.connect(self.load_public_key_file)
+        self.encrypt_tab.layout.addWidget(self.load_public_key_button)
 
         self.message_label = QLabel('Message:')
         self.message_edit = QTextEdit()
@@ -99,8 +103,16 @@ class RSAKeyGenerator(QWidget):
         self.private_key_label = QLabel('Private Key (n d):')
         self.private_key_edit = QTextEdit()
 
+        self.load_private_key_button = QPushButton('Load Private Key from File')
+        self.load_private_key_button.clicked.connect(self.load_private_key_file)
+        self.decrypt_tab.layout.addWidget(self.load_private_key_button)
+
         self.encrypted_message_label_2 = QLabel('Encrypted Message (hex):')
         self.encrypted_message_edit_2 = QTextEdit()
+
+        self.load_encrypted_message_button = QPushButton('Load Encrypted Message from File')
+        self.load_encrypted_message_button.clicked.connect(self.load_encrypted_message_file)
+        self.decrypt_tab.layout.addWidget(self.load_encrypted_message_button)
 
         self.decrypt_button = QPushButton('Decrypt')
         self.decrypt_button.clicked.connect(self.decrypt_message)
@@ -125,6 +137,9 @@ class RSAKeyGenerator(QWidget):
         self.public_key_label_2 = QLabel('Public Key (n e):')
         self.public_key_edit_2 = QTextEdit()
 
+        self.load_public_key_button_2 = QPushButton('Load Public Key')
+        self.load_public_key_button_2.clicked.connect(self.load_public_key_file_2)
+
         self.crack_button = QPushButton('Crack Cipher')
         self.crack_button.clicked.connect(self.crack_cipher)
 
@@ -134,6 +149,7 @@ class RSAKeyGenerator(QWidget):
 
         self.crack_tab.layout.addWidget(self.public_key_label_2)
         self.crack_tab.layout.addWidget(self.public_key_edit_2)
+        self.crack_tab.layout.addWidget(self.load_public_key_button_2)
         self.crack_tab.layout.addWidget(self.crack_button)
         self.crack_tab.layout.addWidget(self.cracked_key_label)
         self.crack_tab.layout.addWidget(self.cracked_key_edit)
@@ -149,6 +165,12 @@ class RSAKeyGenerator(QWidget):
         self.encrypted_message_label_3 = QLabel('Encrypted Message (hex):')
         self.encrypted_message_edit_3 = QTextEdit()
 
+        self.load_public_key_button_3 = QPushButton('Load Public Key')
+        self.load_public_key_button_3.clicked.connect(self.load_public_key_file_3)
+
+        self.load_encrypted_message_button_3 = QPushButton('Load Encrypted Message')
+        self.load_encrypted_message_button_3.clicked.connect(self.load_encrypted_message_file_3)
+
         self.brute_force_button = QPushButton('Brute Force Attack')
         self.brute_force_button.clicked.connect(self.brute_force_attack)
 
@@ -158,13 +180,17 @@ class RSAKeyGenerator(QWidget):
 
         self.brute_force_tab.layout.addWidget(self.public_key_label_3)
         self.brute_force_tab.layout.addWidget(self.public_key_edit_3)
+        self.brute_force_tab.layout.addWidget(self.load_public_key_button_3)
         self.brute_force_tab.layout.addWidget(self.encrypted_message_label_3)
         self.brute_force_tab.layout.addWidget(self.encrypted_message_edit_3)
+        self.brute_force_tab.layout.addWidget(self.load_encrypted_message_button_3)
         self.brute_force_tab.layout.addWidget(self.brute_force_button)
         self.brute_force_tab.layout.addWidget(self.decrypted_message_label_2)
         self.brute_force_tab.layout.addWidget(self.decrypted_message_edit_2)
 
         self.brute_force_tab.setLayout(self.brute_force_tab.layout)
+
+
 
 
     '''
@@ -518,6 +544,48 @@ class RSAKeyGenerator(QWidget):
                 possible_private_keys.append(d)
         return possible_private_keys  # Возвращаем список возможных значений закрытого ключа
 
+
+    def load_public_key_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Public Key File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                public_key = file.read().strip()
+                self.public_key_edit.setPlainText(public_key)
+
+    def load_private_key_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Private Key File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                private_key = file.read().strip()
+                self.private_key_edit.setPlainText(private_key)
+
+    def load_encrypted_message_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Encrypted Message File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                encrypted_message = file.read().strip()
+                self.encrypted_message_edit_2.setPlainText(encrypted_message)
+
+    def load_public_key_file_2(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Public Key File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                public_key = file.read().strip()
+                self.public_key_edit_2.setPlainText(public_key)
+
+    def load_public_key_file_3(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Public Key File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                public_key = file.read().strip()
+                self.public_key_edit_3.setPlainText(public_key)
+
+    def load_encrypted_message_file_3(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Load Encrypted Message File', '', 'Text Files (*.txt)')
+        if file_path:
+            with open(file_path, 'r') as file:
+                encrypted_message = file.read().strip()
+                self.encrypted_message_edit_3.setPlainText(encrypted_message)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
