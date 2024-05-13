@@ -166,6 +166,7 @@ class RSAKeyGenerator(QWidget):
 
         self.brute_force_tab.setLayout(self.brute_force_tab.layout)
 
+
     '''
     Функция генерации ключей
     '''
@@ -214,6 +215,7 @@ class RSAKeyGenerator(QWidget):
         # Выводим открытый и закрытый ключи на экран
         self.result_label.setText(f"Public Key: {public_key_hex}\nPrivate Key: {private_key_hex}")  # Обновляем метку с результатом работы функции
 
+
     '''
     Функция шифрования сообщений
     '''
@@ -249,6 +251,7 @@ class RSAKeyGenerator(QWidget):
         # Выводим зашифрованное сообщение в текстовое поле
         self.encrypted_message_edit.setPlainText(encrypted_message)
 
+
     '''
     Функция дешифровки сообщений
     '''
@@ -278,6 +281,7 @@ class RSAKeyGenerator(QWidget):
 
         # Выводим расшифрованное сообщение в текстовое поле
         self.decrypted_message_edit.setPlainText(decrypted_message)
+
 
     '''
     Функция взлома методом факторизации n
@@ -326,6 +330,7 @@ class RSAKeyGenerator(QWidget):
 
         # Выводим взломанный закрытый ключ на экран
         self.cracked_key_edit.setPlainText(cracked_key_hex)
+
 
     '''
     Функция взлома шифра методом грубой силы(перебора)
@@ -398,15 +403,20 @@ class RSAKeyGenerator(QWidget):
         return e  # Возвращаем число e, которое является открытым экспонентом
 
 
+    def extended_gcd(self, a, b):
+        if a == 0:
+            return (b, 0, 1)
+        else:
+            g, y, x = self.extended_gcd(b % a, a)
+            return (g, x - (b // a) * y, y)
+
+
     def modular_inverse(self, a, m):
-        # Находим модулярное обратное числа a по модулю m
-        m0, x0, x1 = m, 0, 1
-        while a > 1:
-            q = a // m
-            m, a = a % m, m
-            x0, x1 = x1 - q * x0, x0
-        # Если x1 отрицательное, добавляем к нему m0, чтобы получить положительное число
-        return x1 + m0 if x1 < 0 else x1
+        g, x, y = self.extended_gcd(a, m)
+        if g != 1:
+            raise Exception('Modular inverse does not exist')
+        else:
+            return x % m
 
 
     def encrypt(self, message, public_key):
@@ -416,7 +426,6 @@ class RSAKeyGenerator(QWidget):
         encrypted_message = [hex(pow(ord(char), e, n))[2:] for char in message]
         # Объединяем шифрованные символы в одну строку, разделяя пробелами
         return ' '.join(encrypted_message)
-
 
     def decrypt(self, encrypted_message_hex, private_key):
         # Расшифровываем зашифрованное сообщение с использованием закрытого ключа
@@ -429,6 +438,18 @@ class RSAKeyGenerator(QWidget):
             return decrypted_message  # Возвращаем расшифрованное сообщение
         except:
             return None  # В случае ошибки возвращаем None
+
+
+    def fast_exponentiation(self, base, exponent, modulus):
+        # Рекурсивная функция быстрого возведения в степень методом Лагранжа
+        if exponent == 0:
+            return 1
+        elif exponent % 2 == 0:
+            result = self.fast_exponentiation(base, exponent // 2, modulus)
+            return (result * result) % modulus
+        else:
+            result = self.fast_exponentiation(base, (exponent - 1) // 2, modulus)
+            return (base * result * result) % modulus
 
 
     def factorize_n(self, n):
@@ -453,17 +474,34 @@ class RSAKeyGenerator(QWidget):
 
 
     def is_prime(self, n, k=5):
-        # Проверяем, является ли число n простым
+        # Проверяем, является ли число n простым с помощью теста Миллера-Рабина
         if n <= 1:
             return False
         if n <= 3:
             return True
-        # Проверяем простоту числа с помощью теста Ферма
+        if n % 2 == 0:
+            return False
+
+        # Вычисляем значения s и d
+        s = 0
+        d = n - 1
+        while d % 2 == 0:
+            d //= 2
+            s += 1
+
+        # Проводим k итераций теста Миллера-Рабина
         for _ in range(k):
-            a = random.randint(2, n - 2)
-            if pow(a, n - 1, n) != 1:
+            a = random.randint(2, n - 1)
+            x = pow(a, d, n)
+            if x == 1 or x == n - 1:
+                continue
+            for _ in range(s - 1):
+                x = pow(x, 2, n)
+                if x == n - 1:
+                    break
+            else:
                 return False
-        return True  # Если число прошло все проверки, возвращаем True
+        return True
 
 
     def compute_phi_n(self, n):
